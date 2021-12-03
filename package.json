@@ -1,0 +1,37 @@
+{
+  "name": "tuthienminhbach",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma": "npx prisma generate"
+  },
+  "dependencies": {
+    "@chakra-ui/icons": "^1.0.17",
+    "@chakra-ui/react": "^1.6.12",
+    "@emotion/react": "^11.5.0",
+    "@emotion/styled": "^11.3.0",
+    "@fontsource/inter": "^4.5.0",
+    "@next-auth/prisma-adapter": "^0.5.2-next.19",
+    "@prisma/client": "^3.4.1",
+    "axios": "^0.24.0",
+    "framer-motion": "^5.2.1",
+    "next": "12.0.3",
+    "next-auth": "^4.0.0-beta.6",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-hook-form": "^7.19.1",
+    "react-icons": "^4.3.1",
+    "swr": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.34",
+    "eslint": "^7.32.0",
+    "eslint-config-next": "12.0.3",
+    "prisma": "^3.4.1",
+    "typescript": "^4.4.4"
+  }
+}
