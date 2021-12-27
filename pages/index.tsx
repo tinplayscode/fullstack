@@ -34,9 +34,13 @@ import Card from "../common/components/dataDisplay/Card";
 import WhatDoYouThink from "../common/components/dataInput/WhatDoYouThink";
 import { default as charityProjects } from "../common/datasample/charityProject";
 import { default as transactionLog } from "../common/datasample/transactionLog";
+import useSWR from "swr";
+import { fetcher } from "common/utils";
+import { useSession } from "next-auth/react";
 
 export default function Home(): ReactElement | null {
 	const { boxBackground } = useThemeColor();
+	const { data, status } = useSession({ required: false });
 
 	return (
 		<div>
@@ -51,16 +55,18 @@ export default function Home(): ReactElement | null {
 			>
 				{/* Left panel */}
 				<GridItem colSpan={2} order={{ base: 1, md: 0 }}>
-					<Box
-						height="min-content"
-						padding="2"
-						my="2"
-						backgroundColor={boxBackground}
-						rounded="md"
-						shadow="md"
-					>
-						<WhatDoYouThink />
-					</Box>
+					{status === "authenticated" &&
+						<Box
+							height="min-content"
+							padding="2"
+							my="2"
+							backgroundColor={boxBackground}
+							rounded="md"
+							shadow="md"
+						>
+							<WhatDoYouThink />
+						</Box>
+					}
 
 					<Box
 						height="min-content"
@@ -86,7 +92,7 @@ export default function Home(): ReactElement | null {
 				</GridItem>
 
 				{/* Right panel */}
-				<GridItem padding={{ md: "2" }} my="2" rounded="md" shadow="2xl">
+				<GridItem my="2" rounded="md" shadow="2xl">
 					<Box
 						height="min-content"
 						padding="2"
@@ -125,11 +131,12 @@ function NewProjects(): ReactElement | null {
 
 function PopularPosts(): ReactElement | null {
 	const { cardBg } = useThemeColor();
+	const { data, error } = useSWR("/api/v1/post", fetcher);
 
 	return (
 		<Box>
 			<Heading as="h2" fontSize="xl" fontWeight="normal">
-				Popular Posts
+				Newest posts
 			</Heading>
 			<Stack my={2} p="3" shadow="xl" bg={cardBg} rounded="md">
 				<Flex gridColumnGap={2} alignItems="center">
@@ -181,24 +188,40 @@ function PopularPosts(): ReactElement | null {
 							color="pink.400"
 							display="flex"
 							alignItems="center"
-							gridColumnGap={0.5}
+							gridColumnGap={1}
 						>
 							<Icon as={IoHeart} />
-							1.5k loves
+							1.5k
+							<Box as="span" display={{ base: "none", lg: "inline" }}>
+								loves
+							</Box>
 						</Box>
 						<Box
 							as="span"
 							color="gray.500"
 							display="flex"
 							alignItems="center"
-							gridColumnGap={0.5}
+							gridColumnGap={1}
 						>
 							<Icon as={IoChatbubbleEllipsesOutline} />
-							1.5k comments
+							1.5k
+							<Box as="span" display={{ base: "none", lg: "inline" }}>
+								comments
+							</Box>
 						</Box>
-						<Box as="span" color="gray.500" alignItems="items-center">
+						<Box
+
+							as="span"
+							color="gray.500"
+							display="flex"
+							alignItems="center"
+							gridColumnGap={1}
+						>
 							<Icon as={IoShareOutline} />
-							1.5k shares
+							1.5k
+							<Box as="span" display={{ base: "none", lg: "inline" }}>
+								shares
+							</Box>
 						</Box>
 					</Flex>
 				</Box>

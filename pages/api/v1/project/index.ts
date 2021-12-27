@@ -4,14 +4,16 @@ import { getSession } from "next-auth/react";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
-		const { method } = req;
+		const { method, body } = req;
 
 		switch (method) {
 			case "GET":
+
+
 				break;
 
 			case "POST":
-				const { name, description } = req.query;
+				const { projectName, description, money } = req.body;
 
 				// next-auth check if user is signIn
 				const session = await getSession({ req });
@@ -23,11 +25,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					return;
 				}
 
+				if(!projectName || !description || !money) {
+					 throw new Error("Missing fields");
+				}
+
 				const project = await prisma.project.create({
 					data: {
-						name: name as string,
+						name: projectName as string,
 						description: description as string,
-						money: 100000,
+						money: parseInt(money as string),
 						ownerId: session.id as string,
 					},
 				});
@@ -43,6 +49,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 	} catch (err) {
 		console.log(err);
+
+		//send error 500
+		res.status(500).json({
+			message: err.message,
+		});
 	}
 
 	// const { name, description, ownerId } = req.query;

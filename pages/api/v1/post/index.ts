@@ -10,17 +10,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     switch (method) {
       case "GET":
-        const categories = await prisma.category.findMany({
-          include: {
-            projects: true,
-          },
+        const posts = await prisma.post.findMany({
+          include: { author: true },
+
         });
 
-        res.json({ success: true, categories });
+        res.json({ success: true, posts });
         break;
 
       case "POST":
-        const { name, description } = req.body;
+        const { title, text } = req.body;
 
         // next-auth check if user is signIn
         const session = await getSession({ req });
@@ -33,16 +32,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           return;
         }
 
-        const category = await prisma.category.create({
+        const post = await prisma.post.create({
           data: {
-            name: name as string,
-            description: description as string,
-          },
+            title,
+            text,
+            authorId: session.userId as string,
+          }
         });
 
         res.status(200).json({
           success: true,
-          category,
+          post
         });
         break;
 

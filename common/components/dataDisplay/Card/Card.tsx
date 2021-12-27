@@ -24,6 +24,7 @@ function Card(props: Props): JSX.Element {
   const status = useImage({ src: image });
 
   const cardBg = useColorModeValue("white", "gray.900");
+  const cardHoverBg = useColorModeValue("gray.200", "gray.600");
   const cardText = useColorModeValue("black", "whiteAlpha.900");
   // Pass the computed styles into the `__css` prop
   return (
@@ -33,12 +34,13 @@ function Card(props: Props): JSX.Element {
           bg={cardBg}
           p={2}
           rounded="md"
-          shadow="xl"
+          shadow="md"
+
           color={cardText}
           _hover={{
-            transform: "scale(1.01)",
+            backgroundColor: cardHoverBg,
           }}
-          transition="all .5s ease"
+          transition="all .2s ease"
           {...rest}
         >
           {status == "loaded" ? (
