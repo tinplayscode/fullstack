@@ -31,7 +31,6 @@ export default function DonateDone(): ReactElement | null {
     // }
     console.log(data);
 
-
     return (
         <>
             <Head>

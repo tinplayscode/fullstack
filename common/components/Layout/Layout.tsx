@@ -7,6 +7,7 @@ interface Props {
   children: ReactElement;
 }
 
+
 export default function Layout({ children }: Props): ReactElement {
   return (
     <Fragment>

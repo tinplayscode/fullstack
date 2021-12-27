@@ -1,9 +1,6 @@
 import {
-  Avatar,
-  Box,
   Button,
   Flex,
-  Spacer,
   Textarea,
   Image,
   VStack,
@@ -12,6 +9,8 @@ import {
 import { useForm } from "react-hook-form";
 
 import React, { ReactElement } from "react";
+import axios from "axios";
+import { mutate } from "swr";
 
 interface Props { }
 
@@ -22,15 +21,16 @@ function WhatDoYouThink({ }: Props): ReactElement {
     formState: { errors, isSubmitting },
   } = useForm()
 
-  function onSubmit(values) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        alert(JSON.stringify(values, null, 2))
-        const { title, text } = values
+  async function onSubmit(values) {
+    try {
+      const { title, text } = values;
 
-        resolve({ title, text });
-      }, 3000)
-    })
+      mutate("/api/v1/post", false);
+      axios.post("/api/v1/post", { title, text });
+    }
+    catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -50,7 +50,7 @@ function WhatDoYouThink({ }: Props): ReactElement {
             <Textarea placeholder="Nội dung"
               {...register('text', { required: true })}
             ></Textarea>
-            <Button variant="solid" colorScheme="blue">
+            <Button variant="solid" colorScheme="blue" type="submit">
               Gửi
             </Button>
           </VStack>

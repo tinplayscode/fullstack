@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React, { ReactElement } from "react";
+import React, { ReactElement, useCallback } from "react";
 import {
     Flex,
     Box,
@@ -17,8 +17,15 @@ import {
     ModalBody,
     ModalCloseButton,
     useDisclosure,
+    Stack,
+    useToast,
+    Select,
+    Slider,
+    SliderTrack,
+    SliderFilledTrack,
+    SliderThumb,
 } from "@chakra-ui/react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { Category, Project } from "@prisma/client";
 import useThemeColor from "common/hooks/useThemeColor";
 import Card from "common/components/dataDisplay/Card";
@@ -26,6 +33,9 @@ import BreadCrumb from "common/components/BreadCrumb";
 import Head from "next/head";
 import { IoCreate } from "react-icons/io5";
 import { fetcher } from "common/utils";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import { Widget } from "@uploadcare/react-widget";
 
 interface CategoryFix extends Category {
     projects: Project[];
@@ -61,7 +71,7 @@ export default function Home(props: indexProps): ReactElement | null {
                 <title>Danh sách dự án - Tuthienminhbach.com</title>
             </Head>
 
-            <AdminPanel />
+            <AdminPanel categories={data.categories} />
 
             {data.categories.map((category: CategoryFix) => {
                 return (
@@ -106,23 +116,22 @@ export default function Home(props: indexProps): ReactElement | null {
     );
 }
 
-function AdminPanel(): ReactElement | null {
+function AdminPanel({ categories }): ReactElement | null {
     // useSWR call
     const { data, error } = useSWR("/api/auth/session", fetcher);
-    const { boxBackground } = useThemeColor();
 
     if (error) {
         return <div>Error</div>;
     }
 
-    if (!data || data.role !== "ADMIN") {
+    if (data?.role !== "ADMIN") {
         return null;
     }
 
     return (
         <Flex p={2} rounded="md" alignItems="center" gridGap={2} justifyContent="flex-end">
             <CategoryButton />
-            <ProjectButton />
+            <ProjectButton categories={categories} />
         </Flex>
     );
 }
@@ -130,7 +139,30 @@ function AdminPanel(): ReactElement | null {
 function CategoryButton(): ReactElement | null {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
+    const {
+        handleSubmit,
+        register,
+        formState: { errors, isSubmitting },
+    } = useForm()
+
     const initialRef = React.useRef();
+
+    async function onSubmit(values) {
+        try {
+            const { name, description } = values;
+
+            mutate("/api/v1/category", false);
+            const res = await axios.post("/api/v1/category", {
+                name,
+                description,
+            });
+
+            console.log(res)
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <>
@@ -140,32 +172,85 @@ function CategoryButton(): ReactElement | null {
 
             <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Thêm chuyên mục</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody pb={6}>
-                        <FormControl>
-                            <FormLabel>Tên chuyên mục</FormLabel>
-                            <Input ref={initialRef} placeholder="Tên chuyên mục" />
-                        </FormControl>
-                    </ModalBody>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <ModalContent>
+                        <ModalHeader>Thêm chuyên mục</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody pb={6}>
+                            <Stack spacing={2}>
+                                <FormControl isRequired>
+                                    <FormLabel>Tên chuyên mục</FormLabel>
+                                    <Input ref={initialRef} placeholder="Tên chuyên mục"
+                                        {...register('name', { required: true })}
+                                    />
+                                </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel>Mô tả</FormLabel>
+                                    <Input placeholder="Mô tả" {...register('description')} />
+                                </FormControl>
+                            </Stack>
+                        </ModalBody>
 
-                    <ModalFooter>
-                        <Button colorScheme="blue" mr={3}>
-                            Thêm
-                        </Button>
-                        <Button onClick={onClose}>Huỷ</Button>
-                    </ModalFooter>
-                </ModalContent>
+                        <ModalFooter>
+                            <Button colorScheme="blue" mr={3} type="submit">
+                                Thêm
+                            </Button>
+                            <Button onClick={onClose}>Huỷ</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </form>
             </Modal>
         </>
     );
 }
 
-function ProjectButton(): ReactElement | null {
+function ProjectButton({ categories }): ReactElement | null {
     const { isOpen, onOpen, onClose } = useDisclosure();
-
+    const {
+        handleSubmit,
+        register,
+        formState: { errors, isSubmitting },
+    } = useForm()
     const initialRef = React.useRef();
+    const toast = useToast();
+    const [priceCall, setPriceCall] = React.useState(0);
+
+    const onSubmit = useCallback(async (values) => {
+        try {
+            const { name, description, categoryId, money } = values;
+
+            mutate("/api/v1/project", false);
+            const res = await axios.post("/api/v1/project", {
+                name,
+                description,
+                categoryId,
+                money
+            });
+
+            toast({
+                title: "Thành công",
+                description: "Đã thêm dự án",
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            });
+
+            onClose();
+        }
+        catch (error) {
+            toast({
+                title: "Thêm dự án thất bại",
+                description: error.message,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
+        }
+    }, []);
+
+    const onPriceCallChange = useCallback((value) => {
+        setPriceCall(value);
+    }, []);
 
     return (
         <>
@@ -175,19 +260,48 @@ function ProjectButton(): ReactElement | null {
 
             <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <form action="/api/v1/project" method="POST">
+                <form onSubmit={handleSubmit(onSubmit)} method="POST">
                     <ModalContent>
                         <ModalHeader>Thêm dự án</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody pb={6}>
-                            <FormControl>
-                                <FormLabel>Tên dự án</FormLabel>
-                                <Input ref={initialRef} placeholder="Tên chuyên mục" name="projectName" />
-                                <FormLabel>Description</FormLabel>
-                                <Input ref={initialRef} placeholder="Tên chuyên mục" name="description" />
-                                <FormLabel>Money</FormLabel>
-                                <Input ref={initialRef} placeholder="Tên chuyên mục" name="money" />
-                            </FormControl>
+                            <Stack spacing={2}>
+                                <FormControl isRequired>
+                                    <FormLabel>Tên dự án</FormLabel>
+                                    <Input ref={initialRef} placeholder="Tên chuyên mục" {...register('name', { required: true })} />
+                                </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel>Mô tả</FormLabel>
+                                    <Input placeholder="Mô tả" name="description" {...register('description', { require: true })} />
+                                </FormControl>
+                                <FormControl isRequired>
+                                    {/* make priceCall readable */}
+                                    <FormLabel>Mức giá: {priceCall.toLocaleString()} VND</FormLabel>
+                                    <Slider defaultValue={60} min={1000000} max={100000000} step={1000000} value={priceCall} onChange={(event) => onPriceCallChange(event)} name="money">
+                                        <SliderTrack bg='red.100' {...register('money', { required: true })}>
+                                            <Box position='relative' right={10} />
+                                            <SliderFilledTrack bg='tomato' />
+                                        </SliderTrack>
+                                        <SliderThumb boxSize={6} />
+                                    </Slider>
+                                </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel>Chuyên mục</FormLabel>
+                                    <Select name="categoryId" placeholder='Select option' {...register('categoryId', { required: true })}>
+                                        {categories.map((category: Category) => {
+                                            return (
+                                                <option key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </option>
+                                            );
+                                        })}
+                                    </Select>
+                                </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel>Thumbnail</FormLabel>
+                                    <Widget publicKey="533d4b8f6a11de77ba81" />
+                                </FormControl>
+                            </Stack>
                         </ModalBody>
 
                         <ModalFooter>
