@@ -11,7 +11,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         switch (method) {
             case "GET":
-                const users = await prisma.user.findMany();
+                const users = await prisma.user.findMany({
+                    select: {
+                        id: true,
+                        email: true,
+                        role: true,
+                        name: true,
+                        image: true,
+                    },
+                });
 
                 res.json({ success: true, users });
                 break;
