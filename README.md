@@ -1,1 +1,3 @@
-# Tuthien
+# Tuthienminhbach 
+
+Course: Introduction to SE
