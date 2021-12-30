@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "common/lib/prisma-client";
 import { getSession } from "next-auth/react";
@@ -11,13 +10,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         switch (method) {
             case "GET":
-                const users = await prisma.user.findMany({
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        name: true,
-                        image: true,
+                const { userId } = req.query;
+                const users = await prisma.user.findFirst({
+                    where: {
+                        id: userId as string,
                     },
                 });
 

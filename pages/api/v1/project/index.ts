@@ -13,7 +13,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				break;
 
 			case "POST":
-				const { projectName, description, money } = req.body;
+				const { name, description, money, categoryId } = req.body;
 
 				// next-auth check if user is signIn
 				const session = await getSession({ req });
@@ -25,16 +25,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					return;
 				}
 
-				if(!projectName || !description || !money) {
-					 throw new Error("Missing fields");
+				if (!name || !description || !money || !categoryId) {
+					throw new Error("Missing required fields");
 				}
 
 				const project = await prisma.project.create({
 					data: {
-						name: projectName as string,
+						name: name as string,
 						description: description as string,
 						money: parseInt(money as string),
 						ownerId: session.id as string,
+						categoryId: categoryId as string,
 					},
 				});
 

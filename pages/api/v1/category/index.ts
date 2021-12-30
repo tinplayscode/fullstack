@@ -25,12 +25,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // next-auth check if user is signIn
         const session = await getSession({ req });
 
-        console.log(session);
         if (session.role != Role.ADMIN) {
           res.status(401).json({
             message: "Unauthorized",
           });
           return;
+        }
+
+        if (!name || !description) {
+          throw new Error("Missing name or description");
         }
 
         const category = await prisma.category.create({

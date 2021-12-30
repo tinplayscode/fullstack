@@ -2,18 +2,16 @@
 import { ReactElement } from "react"
 import Head from "next/head"
 import BreadCrumb from "common/components/BreadCrumb"
-import { Box } from "@chakra-ui/react"
+import { Box, Flex, Image, Text, Stack } from "@chakra-ui/react"
 import useSWR from "swr";
 import { fetcher } from "common/utils";
 import useThemeColor from "common/hooks/useThemeColor";
-import Router from "next/router";
 import { useSession } from "next-auth/react";
 
 export default function DonateDone(): ReactElement | null {
     const { boxBackground } = useThemeColor();
     const { data, error } = useSWR("/api/v1/user/getAllUser", fetcher);
     const { data: loginData, status } = useSession({ required: true });
-
 
     if (!data) {
         return <div>Loading...</div>;
@@ -29,8 +27,7 @@ export default function DonateDone(): ReactElement | null {
 
     //     return null;
     // }
-    console.log(data);
-
+    const { users } = data;
 
     return (
         <>
@@ -43,22 +40,26 @@ export default function DonateDone(): ReactElement | null {
                 name: "Admin"
             }]} />
 
-            <Box
+            <Stack
                 height="min-content"
                 padding="2"
                 my="2"
                 backgroundColor={boxBackground}
                 rounded="md"
                 shadow="md"
+                spacing="2"
             >
-                {/* {users.map((user) => (
-                    <div key={user.id}>
-                        <div>{user.name}</div>
-                        <div>{user.email}</div>
-                    </div>
-                ))} */}
+                {users.map((user) => (
+                    <Flex gap="2" alignItems="center">
+                        <Image src={user.image ? user.image : "https://via.placeholder.com/150"} width="150px" height="150px" rounded="md" />
 
-            </Box>
+                        <Box>
+                            <Text>{user.email}</Text> {user.name ? <Text>{user.name}</Text> : null}
+                        </Box>
+                    </Flex>
+                ))}
+
+            </Stack>
         </>
     )
 }

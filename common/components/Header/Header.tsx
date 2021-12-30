@@ -23,7 +23,8 @@ import {
   DrawerContent,
   useDisclosure,
   IconButton,
-  useColorModeValue
+  useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import { default as NextLink } from "next/link";
 
@@ -40,6 +41,7 @@ import {
   IoFolder,
   IoList,
   IoSettings,
+  IoLogIn,
 } from "react-icons/io5";
 import useSWR from "swr";
 import { fetcher } from "common/utils/";
@@ -126,7 +128,7 @@ function Header({ }: Props): ReactElement {
             <PopoverTrigger>
               <Button variant="ghost" display={{ base: "none", md: "flex" }} alignItems="center" leftIcon={<Icon as={IoPersonCircle} boxSize={6} />}>
                 <Box display={{ base: "none", md: "block" }}>
-                  <strong>{`${data ? data.user.name : "Khách"}`}</strong>
+                  <strong>{`${data ? data.user.name || data.user.email : "Khách"}`}</strong>
                 </Box>
               </Button>
             </PopoverTrigger>
@@ -135,7 +137,12 @@ function Header({ }: Props): ReactElement {
                 <PopoverArrow />
                 <PopoverHeader>
                   Xin chào{" "}
-                  <strong>{`${data ? data.user.name : "Khách"}`}</strong>
+
+                  <NextLink href={`/profile/${data?.id}`} passHref>
+                    <a>
+                      <strong>{`${data ? data.user.name || data.user.email : "Khách"}`}</strong>
+                    </a>
+                  </NextLink>
                 </PopoverHeader>
                 <PopoverCloseButton />
                 <PopoverBody>
@@ -150,7 +157,16 @@ function Header({ }: Props): ReactElement {
                       Đăng xuất
                     </Button>
                   ) : (
-                    <Flex>
+                    <Flex flexDirection="column" gap={1}>
+                      {/* login with email */}
+                      <Button
+                        colorScheme="blue"
+                        leftIcon={<IoLogIn size={20} />}
+                        as="a"
+                      >
+                        Đăng nhập với Email
+                      </Button>
+
                       <Button
                         colorScheme="blue"
                         leftIcon={<IoLogoGoogle />}
@@ -163,12 +179,13 @@ function Header({ }: Props): ReactElement {
                     </Flex>
                   )}
                 </PopoverBody>
-                <PopoverFooter>
-                  <Text fontSize="sm">
-                    Bằng việc đăng nhập, bạn đồng ý với{" "}
-                    <ChakraLink>Điều khoản dịch vụ</ChakraLink>.
-                  </Text>
-                </PopoverFooter>
+                {status !== "authenticated" && (
+                  <PopoverFooter>
+                    <Text fontSize="sm">
+                      Bằng việc đăng nhập, bạn đồng ý với{" "}
+                      <ChakraLink>Điều khoản dịch vụ</ChakraLink>.
+                    </Text>
+                  </PopoverFooter>)}
               </PopoverContent>
             </Portal>
           </Popover>
