@@ -17,6 +17,7 @@ import {
     ModalBody,
     ModalCloseButton,
     useDisclosure,
+    Select,
 } from "@chakra-ui/react";
 import useSWR from "swr";
 import { Category, Project } from "@prisma/client";
@@ -140,23 +141,27 @@ function CategoryButton(): ReactElement | null {
 
             <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
+                <form action="/api/v1/project" method="POST">
                 <ModalContent>
                     <ModalHeader>Thêm chuyên mục</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <FormControl>
                             <FormLabel>Tên chuyên mục</FormLabel>
-                            <Input ref={initialRef} placeholder="Tên chuyên mục" />
+                            <Input ref={initialRef} placeholder="Tên chuyên mục" name="name" />
+                            <FormLabel>Description</FormLabel>
+                            <Input placeholder="Tên chuyên mục" name="description" />
                         </FormControl>
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button colorScheme="blue" mr={3}>
+                        <Button type="submit" colorScheme="blue" mr={3}>
                             Thêm
                         </Button>
                         <Button onClick={onClose}>Huỷ</Button>
                     </ModalFooter>
                 </ModalContent>
+                </form>
             </Modal>
         </>
     );
@@ -184,9 +189,18 @@ function ProjectButton(): ReactElement | null {
                                 <FormLabel>Tên dự án</FormLabel>
                                 <Input ref={initialRef} placeholder="Tên chuyên mục" name="projectName" />
                                 <FormLabel>Description</FormLabel>
-                                <Input ref={initialRef} placeholder="Tên chuyên mục" name="description" />
+                                <Input placeholder="Tên chuyên mục" name="description" />
                                 <FormLabel>Money</FormLabel>
-                                <Input ref={initialRef} placeholder="Tên chuyên mục" name="money" />
+                                <Input placeholder="Tên chuyên mục" name="money" />
+                                <FormLabel>Chuyên mục</FormLabel>
+                                <Select
+                                    ref={initialRef}    
+                                    name="categoryId"
+                                    placeholder="Chuyên mục"
+                                    options={[
+                                    ]}
+                                    />
+                                     
                             </FormControl>
                         </ModalBody>
 
