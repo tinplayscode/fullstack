@@ -21,6 +21,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       case "POST":
         const { title, text } = req.body;
 
+        console.log("title", title);
+        console.log("text", text);
+
         // next-auth check if user is signIn
         const session = await getSession({ req });
 

@@ -4,12 +4,12 @@ datasource db {
 }
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 model Account {
   id                       String  @id @default(cuid())
-  userId                   String 
+  userId                   String
   type                     String
   provider                 String
   providerAccountId        String
@@ -30,7 +30,7 @@ model Account {
 }
 
 model Session {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -38,7 +38,7 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
   email         String?      @unique
   emailVerified DateTime?
@@ -55,7 +55,7 @@ model User {
 }
 
 model VerificationToken {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   identifier String
   token      String   @unique
   expires    DateTime
@@ -64,39 +64,45 @@ model VerificationToken {
 }
 
 model Category {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String    @unique
   description String?
   projects    Project[]
 }
 
 model Project {
-  id          String     @id @default(cuid())
-  name        String
-  description String?
-  ownerId     String 
-  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  comments    Comment[]
-  money       Int
+  id               String    @id @default(cuid())
+  name             String
+  description      String?
+  ownerId          String
+  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  articleCommentId String
+  articleComment   Comment   @relation("articleComment", fields: [commentId], references: [id])
+  comments         Comment[]
+  money            Int
+  moneyDonated     Int       @default(0)
+  thumbnailUrl     String?
 
   Category   Category?    @relation(fields: [categoryId], references: [id])
-  categoryId String?   
+  categoryId String?
   CharityLog CharityLog[]
+  commentId  String
 }
 
 model Comment {
-  id         String     @id @default(cuid())
+  id         String    @id @default(cuid())
   text       String
-  authorId   String 
+  authorId   String
   author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  projectId  String 
+  projectId  String
   project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt  DateTime  @default(now())
   lastEdited DateTime?
+  Project    Project[] @relation("articleComment")
 }
 
 model CharityLog {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId String
@@ -107,10 +113,10 @@ model CharityLog {
 }
 
 model Post {
-  id         String      @id @default(cuid())
+  id         String     @id @default(cuid())
   title      String
   text       String
-  authorId   String  
+  authorId   String
   author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt  DateTime   @default(now())
   lastEdited DateTime?
@@ -118,7 +124,7 @@ model Post {
 }
 
 model Reaction {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   type      String
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -128,7 +134,7 @@ model Reaction {
 }
 
 model AdminLog {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
