@@ -3,59 +3,77 @@ import prisma from "common/lib/prisma-client";
 import { getSession } from "next-auth/react";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	try {
-		const { method, body } = req;
+  try {
+    const { method, body } = req;
 
-		switch (method) {
-			case "GET":
+    switch (method) {
+      case "GET": {
+        const { id } = req.query;
 
+        if (!id) {
+          throw new Error("No id provided");
+        }
 
-				break;
+        const project = await prisma.project.findFirst({
+          where: { id: id as string },
+        });
 
-			case "POST":
-				const { name, description, money, categoryId } = req.body;
+        if (!project) {
+          throw new Error("Project not found");
+        }
 
-				// next-auth check if user is signIn
-				const session = await getSession({ req });
+        res.status(200).json({
+          project,
+        });
 
-				if (!session) {
-					res.status(401).json({
-						message: "Unauthorized",
-					});
-					return;
-				}
+        break;
+      }
 
-				if (!name || !description || !money || !categoryId) {
-					throw new Error("Missing required fields");
-				}
+      case "POST": {
+        const { name, description, money, categoryId } = req.body;
 
-				const project = await prisma.project.create({
-					data: {
-						name: name as string,
-						description: description as string,
-						money: parseInt(money as string),
-						ownerId: session.id as string,
-						categoryId: categoryId as string,
-					},
-				});
+        // next-auth check if user is signIn
+        const session = await getSession({ req });
 
-				res.status(200).json({
-					success: true,
-					project,
-				});
-				break;
+        if (!session) {
+          res.status(401).json({
+            message: "Unauthorized",
+          });
+          return;
+        }
 
-			default:
-				throw new Error("Wrong method");
-		}
-	} catch (err) {
-		console.log(err);
+        if (!name || !description || !money || !categoryId) {
+          throw new Error("Missing required fields");
+        }
 
-		//send error 500
-		res.status(500).json({
-			message: err.message,
-		});
-	}
+        const project = await prisma.project.create({
+          data: {
+            name: name as string,
+            description: description as string,
+            money: parseInt(money as string),
+            ownerId: session.id as string,
+            categoryId: categoryId as string,
+          },
+        });
 
-	// const { name, description, ownerId } = req.query;
+        res.status(200).json({
+          success: true,
+          project,
+        });
+        break;
+      }
+
+      default:
+        throw new Error("Wrong method");
+    }
+  } catch (err) {
+    console.log(err);
+
+    //send error 500
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+
+  // const { name, description, ownerId } = req.query;
 };
