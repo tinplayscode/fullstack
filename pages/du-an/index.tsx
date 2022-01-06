@@ -200,7 +200,7 @@ function CategoryButton(): ReactElement | null {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
-                  <CKEditor setContent={setDescription} />
+                  <Input placeholder="Mô tả" {...register("description")} />
                 </FormControl>
               </Stack>
             </ModalBody>
