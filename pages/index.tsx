@@ -128,6 +128,8 @@ function NewProjects(): ReactElement | null {
     );
   }
 
+  console.log(data.projects)
+
   return (
     <Fragment>
       <Heading as="h2" fontSize="xl" fontWeight="normal" mb={2}>
@@ -145,7 +147,7 @@ function NewProjects(): ReactElement | null {
               link={`/du-an/${project.id}`}
               tags={[
                 project.Category.name,
-                `Cần thêm ${project.money.toLocaleString()} VNĐ`,
+                `Cần thêm ${(project.money - (project.moneyDonated | 0)).toLocaleString()} VNĐ`,
               ]}
             />
           );

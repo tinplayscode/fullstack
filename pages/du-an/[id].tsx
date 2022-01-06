@@ -1,11 +1,12 @@
 import React, { ReactElement } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import { Grid, GridItem, Box, Skeleton } from "@chakra-ui/react";
+import { Grid, GridItem, Box, Skeleton, Heading, Flex, Text, Stack, Button } from "@chakra-ui/react";
 import useThemeColor from "common/hooks/useThemeColor";
 import { fetcher } from "common/utils";
+import Head from "next/head";
 
-interface Props {}
+interface Props { }
 
 export default function ProjectPage(props: Props) {
   const router = useRouter();
@@ -13,12 +14,31 @@ export default function ProjectPage(props: Props) {
   const { data, error } = useSWR(`/api/v1/project/${id}`, fetcher);
   const { boxBackground } = useThemeColor();
 
-  console.log("data", data);
+  if (!data || error) {
+    return (
+      <>
+        <Head>
+          <title>Loading...</title>
+        </Head>
+
+        <Skeleton height="100px" />
+      </>
+    )
+  }
+
+  const { project } = data;
+
+  console.log("project", project);
 
   return (
-    <div>
-      <h1>Project Page</h1>
-      <p>{id}</p>
+    <Box mt={2}>
+      <Head>
+        <title>{project.name}</title>
+      </Head>
+
+      <Heading as="h1" size="lg">
+        {project?.name}
+      </Heading>
 
       <Grid
         gridTemplateColumns="repeat(auto-fit, minmax(300px, 1fr))"
@@ -33,7 +53,9 @@ export default function ProjectPage(props: Props) {
             rounded="md"
             shadow="md"
           >
-            <ProjectInfo />
+            <ProjectInfo project={project} />
+
+            {/* Charity option */}
           </Box>
         </GridItem>
 
@@ -44,11 +66,27 @@ export default function ProjectPage(props: Props) {
           height="fit-content"
         ></GridItem>
       </Grid>
-    </div>
+    </Box>
   );
 }
 
-function ProjectInfo(): ReactElement | null {
+function ProjectInfo({ project }): ReactElement | null {
   // List item of Project name, description, goal, etc.
-  return <></>;
+  return <>
+    <Heading as="h2" size="lg">
+      Thông tin dự án
+    </Heading>
+
+    <Flex gap="2" alignItems="center">
+      <Text>Tên dự án:</Text>
+      <Text>{project?.name}</Text>
+    </Flex>
+
+    <Stack>
+      <Text>Mô tả:</Text>
+      <Text>{project?.description}</Text>
+    </Stack>
+
+
+  </>;
 }

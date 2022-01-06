@@ -36,12 +36,13 @@ import { fetcher } from "common/utils";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Widget } from "@uploadcare/react-widget";
+import CKEditor from "common/components/dataInput/CKEditor";
 
 interface CategoryFix extends Category {
   projects: Project[];
 }
 
-export interface indexProps {}
+export interface indexProps { }
 
 export default function Home(props: indexProps): ReactElement | null {
   const { data, error } = useSWR("/api/v1/category", fetcher);
@@ -152,10 +153,11 @@ function CategoryButton(): ReactElement | null {
   } = useForm();
 
   const initialRef = React.useRef();
+  const [description, setDescription] = React.useState("");
 
   async function onSubmit(values) {
     try {
-      const { name, description } = values;
+      const { name } = values;
 
       mutate("/api/v1/category", false);
       const res = await axios.post("/api/v1/category", {
@@ -198,7 +200,7 @@ function CategoryButton(): ReactElement | null {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
-                  <Input placeholder="Mô tả" {...register("description")} />
+                  <CKEditor setContent={setDescription} />
                 </FormControl>
               </Stack>
             </ModalBody>
@@ -227,10 +229,11 @@ function ProjectButton({ categories }): ReactElement | null {
   const toast = useToast();
   const [priceCall, setPriceCall] = React.useState(0);
   const [thumbnail, setThumbnail] = React.useState("");
+  const [description, setDescsription] = React.useState("");
 
-  const onSubmit = useCallback(async (values) => {
+  const onSubmit = async (values) => {
     try {
-      const { name, description, categoryId, money } = values;
+      const { name, categoryId, money } = values;
 
       const res = await axios.post("/api/v1/project", {
         name,
@@ -260,7 +263,7 @@ function ProjectButton({ categories }): ReactElement | null {
         isClosable: true,
       });
     }
-  }, []);
+  };
 
   const onPriceCallChange = useCallback((value) => {
     setPriceCall(value);
@@ -295,11 +298,8 @@ function ProjectButton({ categories }): ReactElement | null {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
-                  <Input
-                    placeholder="Mô tả"
-                    name="description"
-                    {...register("description", { required: true })}
-                  />
+                  <CKEditor setContent={setDescsription} />
+
                 </FormControl>
                 <FormControl isRequired>
                   {/* make priceCall readable */}
