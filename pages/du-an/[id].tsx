@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import useThemeColor from "common/hooks/useThemeColor";
 import { fetcher } from "common/utils";
+import Head from "next/head";
 
 interface Props {}
 
@@ -23,10 +24,24 @@ export default function ProjectPage(props: Props) {
   const { data, error } = useSWR(`/api/v1/project/${id}`, fetcher);
   const { boxBackground } = useThemeColor();
 
-  console.log("data", data);
+  if (!data || error) {
+    return (
+      <>
+        <Head>
+          <title>Loading...</title>
+        </Head>
+
+        <Skeleton height="100px" />
+      </>
+    );
+  }
+
+  const { project } = data;
+
+  console.log("project", project);
 
   return (
-    <div>
+    <Box>
       <p>{id}</p>
 
       <Grid gridTemplateColumns="repeat(5, minmax(300px, 1fr))" gridGap="2">
@@ -45,7 +60,9 @@ export default function ProjectPage(props: Props) {
             rounded="md"
             shadow="md"
           >
-            <ProjectInfo />
+            <ProjectInfo project={project} />
+
+            {/* Charity option */}
           </Box>
         </GridItem>
 
@@ -56,11 +73,11 @@ export default function ProjectPage(props: Props) {
           height="fit-content"
         ></GridItem>
       </Grid>
-    </div>
+    </Box>
   );
 }
 
-function ProjectInfo(): ReactElement | null {
+function ProjectInfo({ project }): ReactElement | null {
   // List item of Project name, description, goal, etc.
   return (
     <>
