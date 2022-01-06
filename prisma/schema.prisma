@@ -71,22 +71,19 @@ model Category {
 }
 
 model Project {
-  id               String    @id @default(cuid())
-  name             String
-  description      String?
-  ownerId          String
-  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  articleCommentId String
-  articleComment   Comment   @relation("articleComment", fields: [commentId], references: [id])
-  comments         Comment[]
-  money            Int
-  moneyDonated     Int       @default(0)
-  thumbnailUrl     String?
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  ownerId      String
+  owner        User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  comments     Comment[]
+  money        Int
+  moneyDonated Int       @default(0)
+  thumbnailUrl String?
 
   Category   Category?    @relation(fields: [categoryId], references: [id])
   categoryId String?
   CharityLog CharityLog[]
-  commentId  String
 }
 
 model Comment {
@@ -98,7 +95,6 @@ model Comment {
   project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt  DateTime  @default(now())
   lastEdited DateTime?
-  Project    Project[] @relation("articleComment")
 }
 
 model CharityLog {

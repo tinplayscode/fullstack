@@ -1,7 +1,17 @@
 import React, { ReactElement } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import { Grid, GridItem, Box, Skeleton } from "@chakra-ui/react";
+import {
+  Grid,
+  GridItem,
+  Box,
+  Skeleton,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from "@chakra-ui/react";
 import useThemeColor from "common/hooks/useThemeColor";
 import { fetcher } from "common/utils";
 
@@ -17,14 +27,16 @@ export default function ProjectPage(props: Props) {
 
   return (
     <div>
-      <h1>Project Page</h1>
       <p>{id}</p>
 
-      <Grid
-        gridTemplateColumns="repeat(auto-fit, minmax(300px, 1fr))"
-        gridGap="2"
-      >
-        <GridItem my="2" rounded="md" shadow="2xl" height="fit-content">
+      <Grid gridTemplateColumns="repeat(5, minmax(300px, 1fr))" gridGap="2">
+        <GridItem
+          my="2"
+          rounded="md"
+          shadow="2xl"
+          height="fit-content"
+          colSpan={3}
+        >
           {/* Box of charity project information */}
           <Box
             height="min-content"
@@ -50,5 +62,27 @@ export default function ProjectPage(props: Props) {
 
 function ProjectInfo(): ReactElement | null {
   // List item of Project name, description, goal, etc.
-  return <></>;
+  return (
+    <>
+      <Tabs>
+        <TabList>
+          <Tab>Thông tin dự án</Tab>
+          <Tab>Sao kê ngân hàng</Tab>
+          <Tab>Chủ dự án</Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel>
+            <p>one!</p>
+          </TabPanel>
+          <TabPanel>
+            <p>two!</p>
+          </TabPanel>
+          <TabPanel>
+            <p>three!</p>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </>
+  );
 }
