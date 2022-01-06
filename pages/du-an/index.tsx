@@ -24,6 +24,7 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
+  Textarea,
 } from "@chakra-ui/react";
 import useSWR, { mutate } from "swr";
 import { Category, Project } from "@prisma/client";
@@ -34,8 +35,9 @@ import Head from "next/head";
 import { IoCreate } from "react-icons/io5";
 import { fetcher } from "common/utils";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { Widget } from "@uploadcare/react-widget";
+import CKEditor from "common/components/dataInput/CKEditor";
 
 interface CategoryFix extends Category {
   projects: Project[];
@@ -49,6 +51,9 @@ export default function Home(props: indexProps): ReactElement | null {
 
   if (!data) {
     return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div>failed to load</div>;
   }
 
   return (
@@ -73,7 +78,7 @@ export default function Home(props: indexProps): ReactElement | null {
       <AdminPanel categories={data.categories} />
 
       <Stack spacing={2}>
-        {data.categories.map((category: CategoryFix) => {
+        {data.categories?.map((category: CategoryFix) => {
           return (
             <Box
               key={category.id}
@@ -102,8 +107,8 @@ export default function Home(props: indexProps): ReactElement | null {
                       key={project.id}
                       title={project.name}
                       description={project.description}
-                      // image={project.image}
-                      link={`/projects/${project.id}`}
+                      image={project.thumbnailUrl}
+                      link={`/du-an/${project.id}`}
                     />
                   );
                 })}
@@ -144,6 +149,7 @@ function AdminPanel({ categories }): ReactElement | null {
 
 function CategoryButton(): ReactElement | null {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const {
     handleSubmit,
@@ -152,18 +158,37 @@ function CategoryButton(): ReactElement | null {
   } = useForm();
 
   const initialRef = React.useRef();
+  const [description, setDescription] = React.useState("");
 
   async function onSubmit(values) {
     try {
-      const { name, description } = values;
+      const { name } = values;
 
       mutate("/api/v1/category", false);
       const res = await axios.post("/api/v1/category", {
         name,
         description,
       });
-
+      mutate("/api/v1/category", true);
       console.log(res);
+      onClose();
+      if (res.status === 200) {
+        toast({
+          title: "Thành công",
+          description: "Thêm thành công",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Thất bại",
+          description: "Thêm thất bại",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -198,7 +223,7 @@ function CategoryButton(): ReactElement | null {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
-                  <Input placeholder="Mô tả" {...register("description")} />
+                  <CKEditor setContent={setDescription} />
                 </FormControl>
               </Stack>
             </ModalBody>
@@ -219,26 +244,30 @@ function CategoryButton(): ReactElement | null {
 function ProjectButton({ categories }): ReactElement | null {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
-    handleSubmit,
-    register,
+    handleSubmit: handleSubmit2,
+    register: register,
     formState: { errors, isSubmitting },
   } = useForm();
   const initialRef = React.useRef();
   const toast = useToast();
   const [priceCall, setPriceCall] = React.useState(0);
   const [thumbnail, setThumbnail] = React.useState("");
+  const [description, setDescsription] = React.useState("");
 
-  const onSubmit = useCallback(async (values) => {
+  async function onProjectSubmit(values) {
+    console.log(values);
     try {
-      const { name, description, categoryId, money } = values;
+      const { name, categoryId, money } = values;
 
-      const res = await axios.post("/api/v1/project", {
+      const res: AxiosResponse = await axios.post("/api/v1/project", {
         name,
         description,
         categoryId,
         money,
         thumbnailUrl: thumbnail,
       });
+
+      if (!res.data.success) throw new Error(res.data.message);
 
       toast({
         title: "Thành công",
@@ -250,7 +279,7 @@ function ProjectButton({ categories }): ReactElement | null {
 
       onClose();
 
-      mutate("/api/v1/project", true);
+      // mutate("/api/v1/project", true);
     } catch (error) {
       toast({
         title: "Thêm dự án thất bại",
@@ -260,7 +289,7 @@ function ProjectButton({ categories }): ReactElement | null {
         isClosable: true,
       });
     }
-  }, []);
+  }
 
   const onPriceCallChange = useCallback((value) => {
     setPriceCall(value);
@@ -279,7 +308,7 @@ function ProjectButton({ categories }): ReactElement | null {
 
       <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <form onSubmit={handleSubmit(onSubmit)} method="POST">
+        <form onSubmit={handleSubmit2(onProjectSubmit)}>
           <ModalContent>
             <ModalHeader>Thêm dự án</ModalHeader>
             <ModalCloseButton />
@@ -295,30 +324,22 @@ function ProjectButton({ categories }): ReactElement | null {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
-                  <Input
-                    placeholder="Mô tả"
-                    name="description"
-                    {...register("description", { required: true })}
-                  />
+                  <CKEditor setContent={setDescsription} />
                 </FormControl>
                 <FormControl isRequired>
-                  {/* make priceCall readable */}
                   <FormLabel>
                     Mức giá: {priceCall.toLocaleString()} VND
                   </FormLabel>
                   <Slider
                     defaultValue={60}
+                    {...register("money", { required: true })}
                     min={1000000}
                     max={100000000}
                     step={1000000}
                     value={priceCall}
                     onChange={(event) => onPriceCallChange(event)}
-                    name="money"
                   >
-                    <SliderTrack
-                      bg="red.100"
-                      {...register("money", { required: true })}
-                    >
+                    <SliderTrack bg="red.100">
                       <Box position="relative" right={10} />
                       <SliderFilledTrack bg="tomato" />
                     </SliderTrack>
@@ -332,7 +353,7 @@ function ProjectButton({ categories }): ReactElement | null {
                     placeholder="Select option"
                     {...register("categoryId", { required: true })}
                   >
-                    {categories.map((category: Category) => {
+                    {categories?.map((category: Category) => {
                       return (
                         <option key={category.id} value={category.id}>
                           {category.name}
@@ -341,7 +362,7 @@ function ProjectButton({ categories }): ReactElement | null {
                     })}
                   </Select>
                 </FormControl>
-                <FormControl isRequired>
+                <FormControl>
                   <FormLabel>Thumbnail</FormLabel>
                   <Widget
                     publicKey="533d4b8f6a11de77ba81"
@@ -354,10 +375,12 @@ function ProjectButton({ categories }): ReactElement | null {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
-                Thêm
+              <Button colorScheme="blue" mr={2} type="submit">
+                Tạo project
               </Button>
-              <Button onClick={onClose}>Huỷ</Button>
+              <Button onClick={onClose} type="button">
+                Huỷ
+              </Button>
             </ModalFooter>
           </ModalContent>
         </form>
