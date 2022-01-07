@@ -308,7 +308,7 @@ function ProjectButton({ categories }): ReactElement | null {
         Tạo dự án
       </Button>
 
-      <Modal size="2xl" initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
+      <Modal size="6xl" initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <form onSubmit={handleSubmit2(onProjectSubmit)}>
           <ModalContent>
