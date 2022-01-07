@@ -30,7 +30,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       case "POST": {
-        const { name, description, money, categoryId, thumbnailUrl, bankNumber, bankName }: any = body;
+        const { name, description, money, categoryId, thumbnailUrl, bankNumber, bankName } = body;
 
         // next-auth check if user is signIn
         const session = await getSession({ req });
