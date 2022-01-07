@@ -10,6 +10,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       case "GET":
         const projects = await prisma.project.findMany({
           include: { owner: true, Category: true },
+          //by id
+          orderBy: { id: "desc" },
         });
 
         res.json({ success: true, projects });

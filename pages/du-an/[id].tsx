@@ -11,18 +11,44 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  Text,
+  Divider,
+  Stack,
+  Button,
+  useDisclosure,
+  Img,
+  Flex,
+  useToast,
 } from "@chakra-ui/react";
 import useThemeColor from "common/hooks/useThemeColor";
 import { fetcher } from "common/utils";
 import Head from "next/head";
+import CharityLog from "common/components/dataDisplay/CharityLog";
+import { default as transactionLog } from "common/datasample/transactionLog";
+import { Markup } from "interweave";
+import { Project } from "@prisma/client";
+import { default as NextLink } from "next/link"
+import Router from 'next/router'
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from '@chakra-ui/react'
+import axios from "axios";
 
-interface Props {}
+
+interface Props { }
 
 export default function ProjectPage(props: Props) {
   const router = useRouter();
   const { id } = router.query;
   const { data, error } = useSWR(`/api/v1/project/${id}`, fetcher);
   const { boxBackground } = useThemeColor();
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   if (!data || error) {
     return (
@@ -38,15 +64,61 @@ export default function ProjectPage(props: Props) {
 
   const { project } = data;
 
-  console.log("project", project);
-
   return (
     <Box>
-      <p>{id}</p>
+      <Head>
+        <title>{project.name}</title>
+      </Head>
+      <Button variantColor="blue" variant="outline" my={2}>
+        <NextLink href="/">
+          <a>Back to home</a>
+        </NextLink>
+      </Button>
 
-      <Grid gridTemplateColumns="repeat(5, minmax(300px, 1fr))" gridGap="2">
+      {/* Từ thiện modal */}
+      <Box>
+        <Button onClick={onOpen} colorScheme="green">Gửi từ thiện</Button>
+      </Box>
+
+
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Từ thiện</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {project.bankNumber && (<>
+              <Text>
+                Bạn có thể chuyển khoản vào tài khoản sau:
+              </Text>
+              <Text>
+                <strong>
+                  Ngân hàng: {project.bankName}
+                </strong>
+              </Text>
+              <Text>
+                <strong>
+                  Số tài khoản: {project.bankNumber}
+                </strong>
+              </Text>
+            </>) || <Text>Thông tin chuyển khoản nằm trong mục thông tin dự án.</Text>
+            }
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={onClose}>
+              Đóng
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+
+
+      <Text p={2} as="h2" fontSize="2xl" fontWeight="bold">{project.name}</Text>
+
+      <Grid gridTemplateColumns="repeat(1, 1fr)" gridGap="2">
         <GridItem
-          my="2"
           rounded="md"
           shadow="2xl"
           height="fit-content"
@@ -73,12 +145,13 @@ export default function ProjectPage(props: Props) {
           height="fit-content"
         ></GridItem>
       </Grid>
-    </Box>
+    </Box >
   );
 }
 
-function ProjectInfo({ project }): ReactElement | null {
+function ProjectInfo({ project }: any): ReactElement | null {
   // List item of Project name, description, goal, etc.
+  console.log(project)
   return (
     <>
       <Tabs>
@@ -90,16 +163,122 @@ function ProjectInfo({ project }): ReactElement | null {
 
         <TabPanels>
           <TabPanel>
-            <p>one!</p>
+            <ProjectInfoTab project={project} />
           </TabPanel>
           <TabPanel>
-            <p>two!</p>
+            <CharityLog data={transactionLog} />
           </TabPanel>
           <TabPanel>
-            <p>three!</p>
+            <ProjectOwnerTab owner={project.owner} />
           </TabPanel>
         </TabPanels>
       </Tabs>
     </>
   );
 }
+
+function ProjectInfoTab({ project }): ReactElement {
+  const toast = useToast();
+
+  async function deleteProject(id: any) {
+    axios.delete(`/api/v1/project/`, {
+      data: {
+        id
+      }
+    }).then(({ data }) => {
+      const { success } = data
+
+      if (success) {
+        toast({
+          title: "Xóa dự án thành công",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+
+      }
+      else {
+        toast({
+          title: "Xóa dự án thất bại",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+
+      Router.push("/du-an");
+    });
+  }
+
+  return (
+    <>
+      <Stack>
+        <Text>
+          Số tiền kêu gọi: <Text as="strong">{project.money}</Text> VNĐ
+        </Text>
+        <Text>
+          Số tiền đã quyên góp: <Text as="strong">{project.moneyDonated}</Text> VNĐ
+        </Text>
+        <Text>
+          Số tiền còn lại: <Text as="strong">{project.money - project.moneyDonated}</Text> VNĐ
+        </Text>
+
+        {/* Separated line */}
+        <Divider />
+
+        <Text as="h2" fontSize="xl">
+          Nội dung
+        </Text>
+        {/* Project name */}
+        <Markup
+          content={project.description}
+        />
+
+        {/* Delete project button */}
+        <Button
+          colorScheme="red"
+          variant="outline"
+          my={2}
+          onClick={() => {
+            if (window.confirm("Bạn có chắc chắn muốn xóa dự án này?")) {
+              deleteProject(project.id);
+            }
+          }}
+        >
+          Xóa dự án
+        </Button>
+
+
+      </Stack>
+    </>
+  );
+}
+
+function ProjectOwnerTab({ owner }): ReactElement {
+  return (
+    <>
+      <Stack>
+        <Text as="h2" fontSize="xl">
+          Chủ dự án
+        </Text>
+        <Flex>
+          <GridItem>
+            <Img src={owner.image} />
+          </GridItem>
+
+          <GridItem>
+            <Text>
+              Tên: <Text as="strong">{owner.name}</Text>
+            </Text>
+            <Text>
+              Email: <Text as="strong">{owner.email}
+              </Text>
+            </Text>
+          </GridItem>
+        </Flex>
+
+      </Stack>
+    </>
+  );
+}
+
