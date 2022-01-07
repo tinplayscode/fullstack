@@ -54,8 +54,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             ownerId: session.id as string,
             categoryId: categoryId as string,
             thumbnailUrl: thumbnailUrl as string || "",
-            bankNumber,
-            bankName
+            bankNumber: bankNumber as string || "",
+            bankName: bankName as string || "",
           },
         });
 
