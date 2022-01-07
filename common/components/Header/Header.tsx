@@ -112,7 +112,7 @@ function Header({ }: Props): ReactElement {
                 <Box display={{ base: "none", md: "block" }}>
                   <Flex flexDirection="column">
                     <span>Từ Thiện</span>
-                    <span>Minh bạch</span>
+                    <span>Minh Bạch</span>
                   </Flex>
                 </Box>
                 <Box fontWeight="bold" display={{ md: "none" }}>
@@ -160,14 +160,7 @@ function Header({ }: Props): ReactElement {
                     <Flex flexDirection="column" gap={1}>
                       {/* login with email */}
                       <Button
-                        colorScheme="blue"
-                        leftIcon={<IoLogIn size={20} />}
-                        as="a"
-                      >
-                        Đăng nhập với Email
-                      </Button>
 
-                      <Button
                         colorScheme="blue"
                         leftIcon={<IoLogoGoogle />}
                         onClick={() => {

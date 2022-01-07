@@ -11,6 +11,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import useThemeColor from "common/hooks/useThemeColor";
+import { Markup } from "interweave";
 import Link from "next/link";
 
 interface Props {
@@ -73,13 +74,16 @@ function Card(props: Props): JSX.Element {
               {tags &&
                 tags.map((tag) => (
                   <Tag key={tag} size="sm" variant="solid">
-                    {tag}
+                    {/* if tag more than 40 character, slice and ... */}
+                    {tag.length > 20 ? `${tag.slice(0, 20)}...` : tag}
                   </Tag>
                 ))}
             </Stack>
             {description && (
-              <Text fontSize="sm" color={secondaryTextColor}>
-                {description}
+              <Text fontSize="sm" color={secondaryTextColor} noOfLines={3} textOverflow="clip" maxWidth="400px">
+                <Markup content={description}
+                  noHtml
+                />
               </Text>
             )}
           </Box>

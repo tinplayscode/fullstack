@@ -32,12 +32,13 @@ import {
   IoShareOutline,
 } from "react-icons/io5";
 import BreadCrumb from "../common/components/BreadCrumb";
-import Card from "../common/components/dataDisplay/Card";
-import WhatDoYouThink from "../common/components/dataInput/WhatDoYouThink";
+import Card from "common/components/dataDisplay/Card";
+import WhatDoYouThink from "common/components/dataInput/WhatDoYouThink";
 import { default as transactionLog } from "../common/datasample/transactionLog";
 import useSWR from "swr";
 import { fetcher } from "common/utils";
 import { useSession } from "next-auth/react";
+import { default as CharityLog } from "common/components/dataDisplay/CharityLog";
 
 export default function Home(): ReactElement | null {
   const { boxBackground } = useThemeColor();
@@ -88,12 +89,12 @@ export default function Home(): ReactElement | null {
             rounded="md"
             shadow="md"
           >
-            <CharityLog />
+            <CharityLog data={transactionLog} />
           </Box>
         </GridItem>
 
         {/* Right panel */}
-        <GridItem my="2" rounded="md" shadow="2xl" height="fit-content">
+        <GridItem colSpan={1} my="2" rounded="md" shadow="2xl" height="fit-content">
           <Box
             height="min-content"
             padding="2"
@@ -113,8 +114,6 @@ function NewProjects(): ReactElement | null {
   const { data, error } = useSWR("/api/v1/project/newest", fetcher, {
     revalidateOnFocus: false,
   });
-
-  console.log(data);
 
   if (!data) {
     //fake mapping of length 5
@@ -143,11 +142,11 @@ function NewProjects(): ReactElement | null {
               key={project.id}
               title={project.name}
               description={project.description}
-              image={project?.image}
+              image={project?.thumbnailUrl}
               link={`/du-an/${project.id}`}
               tags={[
                 project.Category.name,
-                `Cần thêm ${(project.money - (project.moneyDonated | 0)).toLocaleString()} VNĐ`,
+                `+${(project.money - (project.moneyDonated | 0)).toLocaleString()} VNĐ`,
               ]}
             />
           );
@@ -197,11 +196,10 @@ function PopularPosts(): ReactElement | null {
         {/* Content */}
         <Box>
           <Heading as="h3" fontSize="md" fontWeight="normal">
-            Tại sao nhà từ thiện nồng cốt cần giúp đỡ những người bị giảm cân?
+            Tại sao nhà từ thiện nồng cốt cần...
           </Heading>
           <Text fontSize="sm" color="gray.500">
-            Nhà từ thiện nồng cốt có thể giúp đỡ những người bị giảm cân và có
-            thể giúp đỡ những người bị bệnh nhiễm môi trường.
+            Nhà từ thiện nồng cốt có thể giúp đỡ những người...
           </Text>
 
           <CharkaImage
@@ -265,47 +263,3 @@ function PopularPosts(): ReactElement | null {
   );
 }
 
-function CharityLog(): ReactElement | null {
-  return (
-    <Box overflowX="auto" maxWidth="100%">
-      <Heading as="h2" fontSize="xl" fontWeight="normal">
-        Vừa từ thiện
-      </Heading>
-      <Table variant="simple" minWidth="1200px">
-        <TableCaption>Dữ liệu được cập nhật thời gian thực</TableCaption>
-        <Thead>
-          <Tr>
-            <Th>Mã số</Th>
-            <Th>Dự án</Th>
-            <Th>Ngày thu</Th>
-            <Th>Số tiền/Hiện vật</Th>
-            <Th>Nhà hảo tâm</Th>
-            <Th>Mục đích</Th>
-          </Tr>
-        </Thead>
-        <Tbody fontSize="sm">
-          {transactionLog.map((log) => (
-            <Tr key={log.id}>
-              <Td>{log.id}</Td>
-              <Td>{log.project}</Td>
-              <Td>{log.date}</Td>
-              <Td>{log.amount}</Td>
-              <Td>{log.donor}</Td>
-              <Td>{log.purpose}</Td>
-            </Tr>
-          ))}
-        </Tbody>
-        <Tfoot>
-          <Tr>
-            <Th>Mã số</Th>
-            <Th>Dự án</Th>
-            <Th>Ngày thu</Th>
-            <Th>Số tiền/Hiện vật</Th>
-            <Th>Nhà hảo tâm</Th>
-            <Th>Mục đích</Th>
-          </Tr>
-        </Tfoot>
-      </Table>
-    </Box>
-  );
-}

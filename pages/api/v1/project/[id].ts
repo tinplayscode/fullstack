@@ -15,6 +15,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         const project = await prisma.project.findFirst({
           where: { id: id as string },
+          include: {
+            owner: true,
+          }
         });
 
         if (!project) {

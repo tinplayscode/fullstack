@@ -43,7 +43,7 @@ interface CategoryFix extends Category {
   projects: Project[];
 }
 
-export interface indexProps {}
+export interface indexProps { }
 
 export default function Home(props: indexProps): ReactElement | null {
   const { data, error } = useSWR("/api/v1/category", fetcher);
@@ -89,8 +89,8 @@ export default function Home(props: indexProps): ReactElement | null {
               shadow="md"
             >
               <Link
-                href="/projects/[id]"
-                as={`/projects/${category.id}`}
+                href="/categories/[id]"
+                as={`/categories/${category.id}`}
                 passHref
               >
                 <CharkaLink>
@@ -205,7 +205,7 @@ function CategoryButton(): ReactElement | null {
         Tạo chuyên mục
       </Button>
 
-      <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
+      <Modal size="xl" initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalContent>
@@ -223,7 +223,7 @@ function CategoryButton(): ReactElement | null {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
-                  <CKEditor setContent={setDescription} />
+                  <Input placeholder="Mô tả" {...register("description")} />
                 </FormControl>
               </Stack>
             </ModalBody>
@@ -257,14 +257,16 @@ function ProjectButton({ categories }): ReactElement | null {
   async function onProjectSubmit(values) {
     console.log(values);
     try {
-      const { name, categoryId, money } = values;
+      const { name, categoryId, bankNumber, bankName } = values;
 
       const res: AxiosResponse = await axios.post("/api/v1/project", {
         name,
         description,
         categoryId,
-        money,
+        money: priceCall,
         thumbnailUrl: thumbnail,
+        bankNumber,
+        bankName
       });
 
       if (!res.data.success) throw new Error(res.data.message);
@@ -279,7 +281,7 @@ function ProjectButton({ categories }): ReactElement | null {
 
       onClose();
 
-      // mutate("/api/v1/project", true);
+      mutate("/api/v1/project", true);
     } catch (error) {
       toast({
         title: "Thêm dự án thất bại",
@@ -306,7 +308,7 @@ function ProjectButton({ categories }): ReactElement | null {
         Tạo dự án
       </Button>
 
-      <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
+      <Modal size="6xl" initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <form onSubmit={handleSubmit2(onProjectSubmit)}>
           <ModalContent>
@@ -325,6 +327,22 @@ function ProjectButton({ categories }): ReactElement | null {
                 <FormControl isRequired>
                   <FormLabel>Mô tả</FormLabel>
                   <CKEditor setContent={setDescsription} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Ngân hàng</FormLabel>
+                  <Input
+                    placeholder="Ngân hàng"
+                    {...register("bankName", { required: true })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Số tài khoản ngân hàng</FormLabel>
+                  <Input
+                    placeholder="Số tài khoản ngân hàng"
+                    type="number"
+                    {...register("bankNumber", { required: true })}
+                  />
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>
