@@ -89,8 +89,8 @@ export default function Home(props: indexProps): ReactElement | null {
               shadow="md"
             >
               <Link
-                href="/projects/[id]"
-                as={`/projects/${category.id}`}
+                href="/categories/[id]"
+                as={`/categories/${category.id}`}
                 passHref
               >
                 <CharkaLink>

@@ -39,6 +39,7 @@ import {
   ModalCloseButton,
 } from '@chakra-ui/react'
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 
 interface Props { }
@@ -76,9 +77,6 @@ export default function ProjectPage(props: Props) {
       </Button>
 
       {/* Từ thiện modal */}
-      <Box>
-        <Button onClick={onOpen} colorScheme="green">Gửi từ thiện</Button>
-      </Box>
 
 
       <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -115,7 +113,11 @@ export default function ProjectPage(props: Props) {
 
 
 
-      <Text p={2} as="h2" fontSize="2xl" fontWeight="bold">{project.name}</Text>
+      <Text px={2} as="h2" fontSize="2xl" fontWeight="bold">{project.name}</Text>
+
+      <Box my={2}>
+        <Button onClick={onOpen} colorScheme="green">Gửi từ thiện</Button>
+      </Box>
 
       <Grid gridTemplateColumns="repeat(1, 1fr)" gridGap="2">
         <GridItem
@@ -145,7 +147,10 @@ export default function ProjectPage(props: Props) {
           height="fit-content"
         ></GridItem>
       </Grid>
-    </Box >
+      <Box my={2}>
+        <Button onClick={onOpen} colorScheme="green">Gửi từ thiện</Button>
+      </Box>
+    </Box>
   );
 }
 
@@ -210,6 +215,8 @@ function ProjectInfoTab({ project }): ReactElement {
     });
   }
 
+  const { data: user, status } = useSession({ required: false });
+
   return (
     <>
       <Stack>
@@ -235,19 +242,19 @@ function ProjectInfoTab({ project }): ReactElement {
         />
 
         {/* Delete project button */}
-        <Button
-          colorScheme="red"
-          variant="outline"
-          my={2}
-          onClick={() => {
-            if (window.confirm("Bạn có chắc chắn muốn xóa dự án này?")) {
-              deleteProject(project.id);
-            }
-          }}
-        >
-          Xóa dự án
-        </Button>
-
+        {user?.role === "ADMIN" &&
+          <Button
+            colorScheme="red"
+            variant="outline"
+            my={2}
+            onClick={() => {
+              if (window.confirm("Bạn có chắc chắn muốn xóa dự án này?")) {
+                deleteProject(project.id);
+              }
+            }}
+          >
+            Xóa dự án
+          </Button>}
 
       </Stack>
     </>
@@ -261,7 +268,7 @@ function ProjectOwnerTab({ owner }): ReactElement {
         <Text as="h2" fontSize="xl">
           Chủ dự án
         </Text>
-        <Flex>
+        <Flex gridGap={2}>
           <GridItem>
             <Img src={owner.image} />
           </GridItem>

@@ -1,18 +1,21 @@
 import React, { ReactElement, useCallback } from "react";
 import Head from "next/head";
 import BreadCrumb from "common/components/BreadCrumb";
-import { Box, Flex, Image, Text, Stack, Select } from "@chakra-ui/react";
+import { Box, Flex, Image, Text, Stack, Select, useToast } from "@chakra-ui/react";
 import useSWR from "swr";
 import { fetcher } from "common/utils";
 import useThemeColor from "common/hooks/useThemeColor";
 import { useSession } from "next-auth/react";
 import { Role, User } from "@prisma/client";
 import prisma from "common/lib/prisma-client";
+import Router from "next/router";
+import axios from "axios";
 
 export default function Admin(): ReactElement | null {
   const { boxBackground } = useThemeColor();
   const { data, error } = useSWR("/api/v1/user/getAllUser", fetcher);
   const { data: loginData, status } = useSession({ required: true });
+  const toast = useToast();
 
   if (!data) {
     return <div>Loading...</div>;
@@ -22,19 +25,45 @@ export default function Admin(): ReactElement | null {
     return <div>Error</div>;
   }
 
-  // if (loginData?.role !== "ADMIN") {
-  //     Router.push("/");
+  if (loginData?.role !== "ADMIN") {
+    Router.push("/");
 
-  //     return null;
-  // }
+    return null;
+  }
+
   const { users } = data;
   //get prisma enum ROLE
   const roles = [Role.USER, Role.PHILANTHROPIST, Role.MODERATOR, Role.ADMIN];
 
-  // const updateRole = useCallback(async (id: string, role: string) => {}, []);
-  // const updateRole = useCallback(async (id: string, role: string) => {
-  //   console.log("Hello worldtri");
-  // }, []);
+  const updateRole = async (id: string, role: string) => {
+    console.log(id, role);
+
+    axios.put(`/api/v1/user/updateRole/${id}`, { role, id }).then((res) => {
+      const { data } = res;
+
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: "Update role success for user id: " + id,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+      else {
+        toast({
+          title: "Error",
+          description: "Update role failed",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+
+
+    });
+
+  }
 
   return (
     <>
@@ -86,7 +115,7 @@ export default function Admin(): ReactElement | null {
 
             <Select
               width={["100%", "100%", "100%", "200px"]}
-              // onChange={(e) => updateRole(user.id, e.target.value)}
+              onChange={(e) => updateRole(user.id, e.target.value)}
               defaultValue={user.role}
             >
               {roles.map((role: Role) => (

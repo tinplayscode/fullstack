@@ -1,9 +1,9 @@
-import { Box, Grid, Link } from "@chakra-ui/react";
+import { Text, Box, Grid, Link } from "@chakra-ui/react";
 import React, { Fragment, ReactElement } from "react";
 
-interface Props {}
+interface Props { }
 
-function Footer({}: Props): ReactElement {
+function Footer({ }: Props): ReactElement {
   return (
     <Fragment>
       <Grid
@@ -15,12 +15,14 @@ function Footer({}: Props): ReactElement {
         padding={3}
       >
         <Box padding="2" w="100%">
-          &copy; TuthienMinhBach
-          <br />
-          Powered by{" "}
-          <Link href={"https://chakra-ui.com/"} isExternal>
-            Chakra UI
-          </Link>
+          <Text opacity="0.6">
+            &copy; TuthienMinhBach
+            <br />
+            Powered by{" "}
+            <Link href={"https://chakra-ui.com/"} isExternal>
+              Chakra UI
+            </Link>
+          </Text>
         </Box>
       </Grid>
     </Fragment>
