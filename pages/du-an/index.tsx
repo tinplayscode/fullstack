@@ -265,8 +265,8 @@ function ProjectButton({ categories }): ReactElement | null {
         categoryId,
         money: priceCall,
         thumbnailUrl: thumbnail,
-        bankNumber,
-        bankName
+        bankNumber: bankNumber as string,
+        bankName: bankName as string,
       });
 
       if (!res.data.success) throw new Error(res.data.message);
