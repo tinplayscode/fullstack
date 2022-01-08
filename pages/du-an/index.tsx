@@ -43,7 +43,7 @@ interface CategoryFix extends Category {
   projects: Project[];
 }
 
-export interface indexProps { }
+export interface indexProps {}
 
 export default function Home(props: indexProps): ReactElement | null {
   const { data, error } = useSWR("/api/v1/category", fetcher);
@@ -151,28 +151,22 @@ function CategoryButton(): ReactElement | null {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const {
-    handleSubmit,
-    register,
-    formState: { errors, isSubmitting },
-  } = useForm();
+  const { handleSubmit, register } = useForm();
 
   const initialRef = React.useRef();
-  const [description, setDescription] = React.useState("");
 
   async function onSubmit(values) {
     try {
-      const { name } = values;
+      const { name, description } = values;
 
-      mutate("/api/v1/category", false);
       const res = await axios.post("/api/v1/category", {
         name,
         description,
       });
-      mutate("/api/v1/category", true);
       console.log(res);
+      mutate("/api/v1/category", true);
       onClose();
-      if (res.status === 200) {
+      if (res.data.success === true) {
         toast({
           title: "Thành công",
           description: "Thêm thành công",
@@ -205,7 +199,12 @@ function CategoryButton(): ReactElement | null {
         Tạo chuyên mục
       </Button>
 
-      <Modal size="xl" initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
+      <Modal
+        size="xl"
+        initialFocusRef={initialRef}
+        isOpen={isOpen}
+        onClose={onClose}
+      >
         <ModalOverlay />
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalContent>
@@ -308,7 +307,12 @@ function ProjectButton({ categories }): ReactElement | null {
         Tạo dự án
       </Button>
 
-      <Modal size="6xl" initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
+      <Modal
+        size="6xl"
+        initialFocusRef={initialRef}
+        isOpen={isOpen}
+        onClose={onClose}
+      >
         <ModalOverlay />
         <form onSubmit={handleSubmit2(onProjectSubmit)}>
           <ModalContent>

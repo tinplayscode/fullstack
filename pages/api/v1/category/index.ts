@@ -26,10 +26,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const session = await getSession({ req });
 
         if (session.role != Role.ADMIN) {
-          res.status(401).json({
-            message: "Unauthorized",
-          });
-          return;
+          throw new Error("Unauthorized");
         }
 
         if (!name || !description) {
@@ -55,9 +52,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (err) {
     console.log(err);
 
-    res.status(500).json({
+    res.status(200).json({
+      success: false,
       message: err.message,
     });
   }
-
 };
